@@ -268,11 +268,11 @@ stream. Output will be done to its typeout."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; pwd
-(define-command (com-pwd :name t :command-table info-table) ()
+(define-command (com-pwd :name t :command-table drei:info-table) ()
   "Print working directory."
-  (esa:display-message 
-   "~a" (directory-namestring
-         (drei:filepath (drei:buffer (drei:current-view))))))
+  (let ((filepath (or (drei:filepath (drei:buffer (drei:current-view)))
+                      *default-pathname-defaults*)))
+    (esa:display-message (directory-namestring filepath))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
