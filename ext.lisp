@@ -9,6 +9,8 @@
 
 (in-package :clim-internals)
 
+(setq *trace-complete-input* t)
+
 (defun ext%normalize-so-far (so-far)
   (reduce (lambda (acc x)
             (ppcre:regex-replace (car x) acc (cadr x)))
@@ -46,7 +48,6 @@
                 #-(or sbcl cmu lispworks openmcl allegro cormanlisp)
                 (directory wildcard)
                 when (let ((mismatch (mismatch (namestring path) full-so-far)))
-                       (q:p path full-so-far mismatch)
                        (or (null mismatch) (= mismatch length)))
                   collect path))
          (strings (mapcar #'namestring pathnames))
@@ -240,3 +241,46 @@ NIL is of type NULL
 (progn
   (clim:define-gesture-name :complete :keyboard (:tab))
   (clim:define-gesture-name :complete :keyboard (#\i :control) :unique nil))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; input-editing.lisp
+;;;; 補完候補一覧の背景色を変える。
+(in-package :clim-internals)
+
+(defun print-possibilities (possibilities possibility-printer stream)
+  "Write `possibitilies' to `stream', using
+`possibility-printer'. `Possibilities' must be a list of
+input-completion possibilities. `Stream' must be an input-editing
+stream. Output will be done to its typeout."
+  (with-input-editor-typeout (stream :erase t)
+    ;; +cornsilk1+ から drei:*background-color* に変更
+    (surrounding-output-with-border (stream :shape :drop-shadow :background drei:*background-color*)
+      (surrounding-output-with-border (stream :shape :rectangle)
+        (let ((ptype `(completion ,possibilities)))
+          (format-items possibilities
+           :stream stream
+           :printer #'(lambda (possibility stream)
+                        (funcall possibility-printer
+                                 possibility
+                                 ptype
+                                 stream))))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; pwd
+(define-command (com-pwd :name t :command-table info-table) ()
+  "Print working directory."
+  (esa:display-message 
+   "~a" (directory-namestring
+         (drei:filepath (drei:buffer (drei:current-view))))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; fuzzy-completions
+
+(in-package :drei-lisp-syntax)
+
+(defmethod fuzzy-completions ((image swank-local-image) symbol-name default-package &optional limit)
+  (declare (ignore image))
+  (let ((swank::*buffer-package* (package-name default-package)))
+    (swank::fuzzy-completions symbol-name swank::*buffer-package* :limit limit)))
