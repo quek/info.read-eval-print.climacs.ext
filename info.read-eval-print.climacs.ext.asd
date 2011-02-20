@@ -4,4 +4,4 @@
   :serial t
   ;; add new files to this list:
   :components ((:file "package") (:file "ext"))
-  :depends-on (:climacs :quek))
+  :depends-on (:quek))

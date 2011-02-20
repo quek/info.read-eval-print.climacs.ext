@@ -3,9 +3,6 @@
 
 (in-package :info.read-eval-print.climacs.ext)
 
-(defun test ()
-  (format t "Hello World from new project info.read-eval-print.climacs.ext~%"))
-
 
 (in-package :clim-internals)
 
@@ -266,36 +263,6 @@ stream. Output will be done to its typeout."
                                  ptype
                                  stream))))))))
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(in-package :info.read-eval-print.climacs.ext)
-
-;;; pwd
-(clim:define-command (com-pwd :name t :command-table drei:info-table) ()
-  "Print working directory."
-  (let ((filepath (or (drei:filepath (drei:buffer (drei:current-view)))
-                      *default-pathname-defaults*)))
-    (esa:display-message (directory-namestring filepath))))
-
-;;; describe-symbol
-(clim:define-command (com-describe-symbol :name t :command-table drei-lisp-syntax::climacs-lisp-table)
-    ()
-  "Describe symbol."
-  (let* ((token (drei-lisp-syntax:this-form (drei:current-syntax) (clim:point)))
-         (this-symbol (drei-lisp-syntax:form-to-object (drei:current-syntax) token)))
-    (when (and this-symbol (symbolp this-symbol))
-      (let ((view (climacs-core:switch-or-move-to-view (esa:current-window) "*Describe*"))
-            (describe (with-output-to-string (out)
-                        (describe this-symbol out))))
-        (drei-core:set-syntax view "Lisp")
-        (flexichain:insert-sequence (clim:point) describe)))))
-
-(esa:set-key 'com-describe-symbol
-             'drei-lisp-syntax::climacs-lisp-table
-             '((#\c :control) (#\d :control) (#\d)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; fuzzy-completions
